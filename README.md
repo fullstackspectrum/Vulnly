@@ -17,7 +17,7 @@ pip install vulnly
 ## Features
 
 - **Fully offline reports** — a single HTML file with fonts, charting library and logo embedded. No CDN, no web fonts, no outbound requests when opened, so reports work on airgapped hosts and keep working once archived
-- Supports multiple scanner sources: **Cloudsmith**, **Trivy**, **Grype**, and **Snyk** (auto-detected or via `--source` flag)
+- Supports multiple scanner sources: **Cloudsmith** (both the v1 CLI scan output and the v2 OSV advisory API), **Trivy**, **Grype**, and **Snyk** (auto-detected or via `--source` flag)
 - **Repository summary reports** — automatically detects Cloudsmith repo-level summaries and generates a dedicated overview report with package status breakdown, aggregate vulnerability counts, and per-package detail table
 - Dark and light colour themes via `--theme` flag, plus an in-report toggle so readers can switch without regenerating
 - Interactive doughnut charts showing severity or status distribution (Chart.js, bundled)
@@ -49,6 +49,7 @@ vulnly scan.json --source trivy
 vulnly scan.json --source grype
 vulnly scan.json --source snyk
 vulnly scan.json --source cloudsmith
+vulnly scan.json --source cloudsmith-osv
 ```
 
 If `--source` is specified and the input doesn't match the expected format, the tool exits with a clear error message.
@@ -119,6 +120,25 @@ Pipe vulnerability scan results directly from the Cloudsmith CLI:
 cloudsmith vulnerabilities WORKSPACE/REPO/PACKAGE_IDENTIFIER --output-format json | vulnly -
 ```
 
+#### Cloudsmith vulnerabilities API (v2, OSV)
+
+The [v2 vulnerabilities endpoint](https://docs.cloudsmith.com/api/packages/vulnerabilities/list)
+serves OSV advisory records for a package, and supersedes the v1 data the CLI
+command returns. It answers with advisories alone and names no package, so
+pass the package identity yourself:
+
+```bash
+curl -s -H "X-Api-Key: $CLOUDSMITH_API_KEY" \
+  "https://api.cloudsmith.io/v2/packages/PACKAGE_SLUG_PERM/vulnerabilities/" \
+| vulnly --source cloudsmith-osv - \
+    --repository WORKSPACE/REPO --package log4j --package-version 2.14.1
+```
+
+The endpoint paginates (`page`, `page_size`) and filters server-side by
+`threat_level`, `cvss_min`/`cvss_max`, `vulnerability_id` and `is_malware`.
+Whatever a page contains is what the report covers, so raise `page_size` if
+you want everything in one report.
+
 #### Trivy
 
 Scan an image with Trivy and pipe directly to Vulnly:
@@ -160,6 +180,8 @@ sortable table with search, severity and fixable filters, and CSV export:
 ```
 usage: vulnly [-h] [-v] [-o OUTPUT] [--logo LOGO]
               [--theme {dark,light}] [--source SOURCE]
+              [--package PACKAGE] [--package-version PACKAGE_VERSION]
+              [--repository REPOSITORY]
               input
 
 Generate an HTML vulnerability report from a JSON input file.
@@ -176,9 +198,21 @@ options:
   --logo LOGO           Path to a custom logo image (embedded in the
                         report as a data URI)
   --theme {dark,light}  Report colour theme (default: dark)
-  --source SOURCE       Scanner source format: cloudsmith, grype, snyk,
-                        trivy (auto-detected if omitted)
+  --source SOURCE       Scanner source format: cloudsmith, cloudsmith-osv,
+                        grype, snyk, trivy (auto-detected if omitted)
+  --package PACKAGE     Package name to show in the report (overrides the
+                        input)
+  --package-version PACKAGE_VERSION
+                        Package version to show in the report (overrides
+                        the input)
+  --repository REPOSITORY
+                        Repository path to show in the report (overrides
+                        the input)
 ```
+
+The three metadata flags override whatever the input format supplied. They
+exist for `cloudsmith-osv`, whose payload is advisory data carrying no package
+identity, but they apply to any source.
 
 ### Environment variables
 
@@ -251,7 +285,65 @@ The expected structure has a top-level `data` object containing `package`, `scan
 }
 ```
 
-### 2. Cloudsmith repository summary format
+### 2. Cloudsmith OSV format (v2 API)
+
+Pass the response from `GET /v2/packages/{package_slug_perm}/vulnerabilities/`.
+The tool reads Cloudsmith's precomputed `best_severity` (falling back to the
+raw OSV `severity` arrays), the affected package name and ecosystem, and the
+version ranges:
+
+```json
+{
+    "results": [
+        {
+            "id": "GHSA-jfh8-c2jp-5v3q",
+            "summary": "Remote code execution in Log4j2 via JNDI lookup",
+            "package_name": "org.apache.logging.log4j:log4j-core",
+            "is_malware": false,
+            "best_severity": {
+                "type": "CVSS_V3",
+                "label": "critical",
+                "cvss": { "base_score": 10.0 }
+            },
+            "affected": [
+                {
+                    "package": {
+                        "ecosystem": "Maven",
+                        "name": "org.apache.logging.log4j:log4j-core"
+                    },
+                    "ranges": [
+                        {
+                            "type": "ECOSYSTEM",
+                            "events": [
+                                { "introduced": "2.0-beta9" },
+                                { "fixed": "2.15.0" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+Two things differ from the v1 scan output, both inherent to OSV rather than
+choices the tool makes:
+
+- **Affected version is a range**, such as `>=2.0-beta9 <2.15.0`, not the
+  version present in the package. OSV describes which versions an advisory
+  applies to; it does not record what was installed. `GIT` commit ranges are
+  skipped in favour of `SEMVER`/`ECOSYSTEM` ones, and a record with no ranges
+  falls back to its enumerated `versions`.
+- **The payload names no package.** Use `--package`, `--package-version` and
+  `--repository` to fill in the report header.
+
+Records flagged `is_malware` are reported as Critical — they carry no CVSS
+vector, so they would otherwise sort below genuinely lesser findings. Vendor
+threat levels outside the five report severities (`important`, `moderate`,
+`negligible`, `unimportant`, `none`) are mapped onto them.
+
+### 3. Cloudsmith repository summary format
 
 Pass the repo-level summary JSON from Cloudsmith. This is auto-detected and produces a repository overview report instead of a per-package vulnerability report:
 
@@ -294,7 +386,7 @@ The report includes status cards (vulnerable, no issues, not scanned), aggregate
 
 Package status values: `vulnerable`, `no_issues_found`, `no_scan`.
 
-### 3. Trivy format
+### 4. Trivy format
 
 Pass Trivy's JSON output (`trivy image -f json`). The tool maps `ArtifactName`, `Results[].Vulnerabilities[]`, CVSS scores, and fix versions:
 
@@ -303,7 +395,7 @@ trivy image -f json nginx:latest > trivy-output.json
 vulnly trivy-output.json
 ```
 
-### 4. Grype format
+### 5. Grype format
 
 Pass Grype's JSON output (`grype -o json`). The tool maps `matches[]`, artifact metadata, CVSS scores, and fix versions:
 
@@ -312,7 +404,7 @@ grype nginx:latest -o json > grype-output.json
 vulnly grype-output.json
 ```
 
-### 5. Snyk format
+### 6. Snyk format
 
 Pass Snyk's JSON output (`snyk container test --json`). The tool maps `vulnerabilities[]`, CVSS scores, CVE identifiers, and fix versions. Duplicate vulnerability paths are automatically deduplicated:
 
@@ -321,7 +413,7 @@ snyk container test nginx:latest --json > snyk-output.json
 vulnly snyk-output.json
 ```
 
-### 6. Simplified format
+### 7. Simplified format
 
 A flat JSON structure is also supported for custom integrations:
 

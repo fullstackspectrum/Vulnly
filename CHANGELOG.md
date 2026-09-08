@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Cloudsmith v2 vulnerabilities API support** (`--source cloudsmith-osv`), for the OSV advisory records served by `GET /v2/packages/{package_slug_perm}/vulnerabilities/`. The v1 CLI format the `cloudsmith vulnerabilities` command emits is unchanged and still auto-detected; the v2 format is auto-detected too. Cloudsmith's precomputed `best_severity` supplies the severity and CVSS score, falling back to the raw OSV `severity` arrays. Malware records are reported as Critical, since they carry no CVSS vector and would otherwise sort below lesser findings, and vendor threat levels outside the five report severities are mapped onto them. Duplicate records — returned when the endpoint is queried with `primary_records=false` — are collapsed.
+- `--package`, `--package-version` and `--repository`, which set the package identity shown in the report. The v2 OSV payload is advisory data and names no package, so there is nothing to derive it from; the flags apply to any source.
+
 ## [1.0.0] - 2026-08-13
 
 First stable release.
