@@ -4,13 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.1.0] - 2026-09-08
+## [Unreleased]
 
 ### Added
-- support the Cloudsmith v2 OSV vulnerabilities API
+- **Homebrew installation** — `brew install fullstackspectrum/vulnly/vulnly`, on macOS and Linux. The formula lives in the [fullstackspectrum/homebrew-vulnly](https://github.com/fullstackspectrum/homebrew-vulnly) tap and is updated with each stable release; betas remain on PyPI only.
 
+### Changed
+- GitHub links now point at the `fullstackspectrum` account, which was renamed from `colinmoynes`. This covers the link in every report's footer, the project links on PyPI, the security policy and the README. GitHub redirects the old URLs, but only until someone else registers the name.
 
-## [Unreleased]
+## [1.1.0] - 2026-09-08
 
 ### Added
 - **Cloudsmith v2 vulnerabilities API support** (`--source cloudsmith-osv`), for the OSV advisory records served by `GET /v2/packages/{package_slug_perm}/vulnerabilities/`. The v1 CLI format the `cloudsmith vulnerabilities` command emits is unchanged and still auto-detected; the v2 format is auto-detected too. Cloudsmith's precomputed `best_severity` supplies the severity and CVSS score, falling back to the raw OSV `severity` arrays. Malware records are reported as Critical, since they carry no CVSS vector and would otherwise sort below lesser findings, and vendor threat levels outside the five report severities are mapped onto them. Duplicate records — returned when the endpoint is queried with `primary_records=false` — are collapsed.
