@@ -7,11 +7,11 @@ the person reading it, so vulnerability reports are taken seriously.
 ## Reporting a vulnerability
 
 Report it privately through
-[GitHub Security Advisories](https://github.com/colinmoynes/Vulnly/security/advisories/new).
+[GitHub Security Advisories](https://github.com/fullstackspectrum/Vulnly/security/advisories/new).
 This is the preferred route: it lets us discuss and fix the issue before any
 detail is public.
 
-If you cannot use advisories, [open an issue](https://github.com/colinmoynes/Vulnly/issues)
+If you cannot use advisories, [open an issue](https://github.com/fullstackspectrum/Vulnly/issues)
 saying you have a security report and asking for a private channel — **without
 the technical detail**. Issues are public the moment they are filed, so
 anything reproducible in one is disclosed to everybody, including before a fix

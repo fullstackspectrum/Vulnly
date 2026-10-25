@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/colinmoynes/vulnly/main/assets/icons/vulnly-readme-banner.png" alt="Vulnly" width="800">
+<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/icons/vulnly-readme-banner.png" alt="Vulnly" width="800">
 
 Generate self-contained HTML vulnerability reports from Cloudsmith, Trivy, Grype and Snyk.
 Every report is a single file that opens with no network access.
@@ -12,6 +12,12 @@ Install from PyPI (Currently in beta):
 
 ```bash
 pip install vulnly
+```
+
+Or with Homebrew on macOS and Linux:
+
+```bash
+brew install fullstackspectrum/vulnly/vulnly
 ```
 
 ## Features
@@ -168,12 +174,12 @@ snyk container test nginx:latest --json | vulnly --source snyk -
 The scan summary — severity and fixable counts, the distribution chart, and an
 executive summary whose alert reflects whether anything is actually urgent:
 
-<img src="https://raw.githubusercontent.com/colinmoynes/vulnly/main/assets/readme/example.jpg" alt="Vulnly report summary: stat cards, severity distribution chart and executive summary">
+<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example.jpg" alt="Vulnly report summary: stat cards, severity distribution chart and executive summary">
 
 Further down, the findings themselves — where they are concentrated, then a
 sortable table with search, severity and fixable filters, and CSV export:
 
-<img src="https://raw.githubusercontent.com/colinmoynes/vulnly/main/assets/readme/example2.jpg" alt="Vulnly findings: top affected packages breakdown and the filterable vulnerability table">
+<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example2.jpg" alt="Vulnly findings: top affected packages breakdown and the filterable vulnerability table">
 
 ## Usage
 
