@@ -3,12 +3,15 @@
 Generate self-contained HTML vulnerability reports from Cloudsmith, Trivy, Grype and Snyk.
 Every report is a single file that opens with no network access.
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+[![PyPI](https://img.shields.io/pypi/v/vulnly.svg)](https://pypi.org/project/vulnly/)
+[![Python](https://img.shields.io/pypi/pyversions/vulnly.svg)](https://pypi.org/project/vulnly/)
+[![Downloads](https://img.shields.io/pypi/dm/vulnly.svg)](https://pypistats.org/packages/vulnly)
+[![Homebrew](https://img.shields.io/badge/homebrew-fullstackspectrum%2Fvulnly-orange.svg)](https://github.com/fullstackspectrum/homebrew-vulnly)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 ## Installation
 
-Install from PyPI (Currently in beta):
+Install from PyPI:
 
 ```bash
 pip install vulnly

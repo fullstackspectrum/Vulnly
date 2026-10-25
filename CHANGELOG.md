@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.1] - 2026-10-25
 
 ### Added
 - **Homebrew installation** — `brew install fullstackspectrum/vulnly/vulnly`, on macOS and Linux. The formula lives in the [fullstackspectrum/homebrew-vulnly](https://github.com/fullstackspectrum/homebrew-vulnly) tap and is updated with each stable release; betas remain on PyPI only.
