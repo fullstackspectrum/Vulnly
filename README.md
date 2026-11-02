@@ -3,12 +3,14 @@
 Generate self-contained HTML vulnerability reports from Cloudsmith, Trivy, Grype and Snyk.
 Every report is a single file that opens with no network access.
 
-[![PyPI](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpypi.org%2Fpypi%2Fvulnly%2Fjson&query=%24.info.version&prefix=v&label=pypi&color=blue)](https://pypi.org/project/vulnly/)
-[![Python](https://img.shields.io/pypi/pyversions/vulnly.svg)](https://pypi.org/project/vulnly/)
-[![Downloads](https://img.shields.io/pypi/dm/vulnly.svg)](https://pypistats.org/packages/vulnly)
-[![Status](https://img.shields.io/pypi/status/vulnly.svg)](https://pypi.org/project/vulnly/)
-[![Homebrew](https://img.shields.io/badge/homebrew-fullstackspectrum%2Fvulnly-orange.svg)](https://github.com/fullstackspectrum/homebrew-vulnly)
-[![License](https://img.shields.io/pypi/l/vulnly.svg)](https://github.com/fullstackspectrum/vulnly/blob/main/LICENSE)
+<p align="center">
+  <a href="https://pypi.org/project/vulnly/"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpypi.org%2Fpypi%2Fvulnly%2Fjson&query=%24.info.version&prefix=v&label=PyPI&logo=pypi&logoColor=white&style=flat-square&labelColor=1f2937&color=0e7490" alt="PyPI"></a>
+  <a href="https://pypi.org/project/vulnly/"><img src="https://img.shields.io/pypi/pyversions/vulnly?label=Python&logo=python&logoColor=white&style=flat-square&labelColor=1f2937&color=0e7490" alt="Python"></a>
+  <a href="https://pypistats.org/packages/vulnly"><img src="https://img.shields.io/pypi/dm/vulnly?label=Downloads&style=flat-square&labelColor=1f2937&color=0e7490" alt="Downloads"></a>
+  <a href="https://pypi.org/project/vulnly/"><img src="https://img.shields.io/pypi/status/vulnly?label=Status&style=flat-square&labelColor=1f2937&color=0e7490" alt="Status"></a>
+  <a href="https://github.com/fullstackspectrum/homebrew-vulnly"><img src="https://img.shields.io/badge/Homebrew-fullstackspectrum%2Fvulnly-0e7490?logo=homebrew&logoColor=white&style=flat-square&labelColor=1f2937" alt="Homebrew"></a>
+  <a href="https://github.com/fullstackspectrum/vulnly/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/vulnly?label=License&logo=apache&logoColor=white&style=flat-square&labelColor=1f2937&color=0e7490" alt="License"></a>
+</p>
 
 ## Installation
 
