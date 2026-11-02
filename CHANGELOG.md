@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 - The summary cards at the top of a report no longer leave one or two cards stranded on a row of their own. They now sit in one row on wide screens and in full, even rows on narrower ones.
+- Trivy output from a scan that found nothing to check, such as a project with no lock file, is now accepted and produces a clean report. Trivy leaves out its `Results` array in that case, so vulnly rejected the file, even with `--source trivy`.
 
 ## [1.1.1] - 2026-10-25
 
