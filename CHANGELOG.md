@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ### Changed
 - The author contact on PyPI is now `dev@fullstackspectrum.com`.
 
+### Fixed
+- The summary cards at the top of a report no longer leave one or two cards stranded on a row of their own. They now sit in one row on wide screens and in full, even rows on narrower ones.
+
 ## [1.1.1] - 2026-10-25
 
 ### Added
