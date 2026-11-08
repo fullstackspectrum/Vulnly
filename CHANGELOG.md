@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-08
 
 ### Changed
 - **A new look for reports**, in line with the Full-Stack-Spectrum brand. Headings and text are set in Space Grotesk, and labels, numbers and identifiers in JetBrains Mono. Both fonts are embedded, like Inter before them, so reports still open with no network access. Severity colours now run along the brand spectrum: critical red, high orange, medium yellow and low blue. The light theme keeps every text colour at WCAG AA contrast or better.
