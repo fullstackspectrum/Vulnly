@@ -243,7 +243,7 @@ opened**. Everything it needs is embedded:
 | Asset | Source | Licence |
 | --- | --- | --- |
 | Charting | Chart.js 4.4.0, bundled and inlined | MIT |
-| Typography | Inter, variable font covering weights 400–800 | SIL OFL 1.1 |
+| Typography | Space Grotesk (300–700) and JetBrains Mono (100–800), variable fonts, latin subset | SIL OFL 1.1 |
 | Logo | Embedded as a data URI | — |
 
 This means reports render identically on airgapped hosts and in restricted

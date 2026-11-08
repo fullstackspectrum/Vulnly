@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- **A new look for reports**, in line with the Full-Stack-Spectrum brand. Headings and text are set in Space Grotesk, and labels, numbers and identifiers in JetBrains Mono. Both fonts are embedded, like Inter before them, so reports still open with no network access. Severity colours now run along the brand spectrum: critical red, high orange, medium yellow and low blue. The light theme keeps every text colour at WCAG AA contrast or better.
+- **A new Vulnly logo**, the Layered Shield: three stacked shields with a red core. In reports it follows the light or dark theme, and the favicon, app icon, wordmarks and README banner have been redrawn to match.
+
+### Fixed
+- Severity labels outside the five report levels are now handled the same way for every scanner. Grype and Trivy both use "Negligible", which the summary cards counted as Unknown while the chart showed it nowhere and the table left those rows unstyled at the top. These findings are now counted as Low everywhere, as Cloudsmith OSV results already were.
+
 ## [1.1.2] - 2026-11-02
 
 ### Changed

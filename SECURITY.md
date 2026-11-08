@@ -71,7 +71,7 @@ severity rendered lower than the scanner reported.
 - the accuracy of vulnerability data, which Vulnly renders but does not produce
 - running Vulnly against a scan file you already control, on your own machine,
   to affect only yourself
-- outdated versions of the bundled Chart.js or Inter, absent a demonstrated
+- outdated versions of the bundled Chart.js or fonts, absent a demonstrated
   impact on a generated report
 
 ## Security properties we maintain
