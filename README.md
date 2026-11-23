@@ -33,10 +33,14 @@ brew install fullstackspectrum/vulnly/vulnly
 - **Repository summary reports** — automatically detects Cloudsmith repo-level summaries and generates a dedicated overview report with package status breakdown, aggregate vulnerability counts, and per-package detail table
 - Dark and light colour themes via `--theme` flag, plus an in-report toggle so readers can switch without regenerating
 - Interactive doughnut charts showing severity or status distribution (Chart.js, bundled)
-- Severity stat cards (Total, Critical, High, Medium, Low, Unknown) and a count of findings that have a fix available
+- **Know what to fix first** — every finding is checked against CISA's [Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) catalogue and FIRST's [EPSS](https://www.first.org/epss/) scores, and the table opens in priority order: known exploited, then likely exploited, then severity
+- **VEX** — `--vex` applies OpenVEX statements: findings ruled out leave the counts and are listed separately with their justification, so nothing disappears silently
+- **CI gating** — `--fail-on kev,epss,critical,high,fixable` exits 1 when any of them occur
+- Stat cards for the total, fixable, known exploited and likely exploited findings, then each severity
+- Severity and score from CVSS vectors (3.x and 4.0) when a source gives only the vector
 - **Top affected packages** — a ranked breakdown showing where findings are concentrated, since one bad dependency usually dominates a scan
 - Auto-generated executive summary, with an alert that distinguishes urgent findings from routine ones and from a clean scan
-- Client-side search, severity filters and a fixable-only toggle, with sortable columns and pagination so large reports stay usable
+- Client-side search, severity filters and fixable, known-exploited and likely-exploited toggles, with sortable columns and pagination so large reports stay usable
 - **CSV export** of the current filtered view, safe to open in a spreadsheet
 - Automatic linking for CVE IDs (NVD) and GHSA IDs (GitHub Advisories)
 - Customisable logo — supply via `--logo`, embedded in the report as a data URI
@@ -175,51 +179,151 @@ Test a container image with Snyk and pipe directly to Vulnly:
 snyk container test nginx:latest --json | vulnly --source snyk -
 ```
 
+## Prioritising findings
+
+A scan with a thousand findings doesn't need a thousand fixes this week. Vulnly
+adds two signals to each finding with a CVE, and puts the table in that order:
+
+- **Known exploited**: the CVE is in CISA's Known Exploited Vulnerabilities
+  (KEV) catalogue, so it's being exploited in the wild. The row gets a `KEV`
+  tag, with the date CISA added it and whether it's linked to ransomware.
+- **Likely exploited**: FIRST's EPSS gives the probability the CVE is
+  exploited in the next 30 days. 10% or more counts as likely; that's roughly
+  the top 5% of all scored CVEs. Change it with `--epss-threshold`.
+
+The table opens with known exploited findings first, then likely exploited,
+then by severity, with EPSS and CVSS breaking ties. `--sort severity` keeps
+the 1.2 order. The executive summary and alert lead with known exploited
+findings when there are any.
+
+GHSA and Snyk IDs are matched through the CVE aliases the scanner reports.
+
+### Network and air-gapped hosts
+
+KEV and EPSS are looked up when the report is generated, cached for a day in
+`~/.cache/vulnly`, and embedded in the report, which still opens with no
+network access. If a lookup fails, the report is generated anyway and says
+the data is missing.
+
+On a host with no internet access, download the data elsewhere and pass it in,
+or turn the lookups off:
+
+```bash
+curl -LO https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+curl -LO https://epss.empiricalsecurity.com/epss_scores-current.csv.gz
+vulnly scan.json --kev known_exploited_vulnerabilities.json --epss epss_scores-current.csv.gz
+
+vulnly scan.json --no-enrich        # or set VULNLY_NO_ENRICH=1
+```
+
+### VEX
+
+If your team has decided some findings don't apply, record it in an
+[OpenVEX](https://openvex.dev) document and pass it with `--vex` (repeatable):
+
+```bash
+vulnly scan.json --vex exceptions.openvex.json
+```
+
+Findings marked `not_affected` or `fixed` leave the counts, the chart and the
+table, and are listed under the table with the statement's justification.
+`under_investigation` findings stay, tagged. A statement that names packages
+applies only to those packages. in-toto attestations and DSSE envelopes
+wrapping OpenVEX are read too.
+
+### CI gating
+
+`--fail-on` exits 1 when any listed category occurs. The report is written
+either way.
+
+| Category | Fails when |
+| --- | --- |
+| `kev` | a finding is known exploited |
+| `epss` | a finding is likely exploited (EPSS at or over the threshold) |
+| `critical` | a finding is rated critical |
+| `high` | a finding is rated critical or high |
+| `fixable` | a finding has a fix available |
+
+```bash
+vulnly scan.json --fail-on kev,epss
+```
+
+A `kev` or `epss` gate fails, rather than passes, when that data couldn't be
+looked up, so a network outage can't wave a build through.
+
 ## Example report
 
-The scan summary — severity and fixable counts, the distribution chart, and an
-executive summary whose alert reflects whether anything is actually urgent:
+The scan summary for `nginx:1.21`: the total, fixable, known exploited and
+likely exploited counts, then each severity, the distribution chart, and an
+executive summary that leads with what's being exploited:
 
-<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example.jpg" alt="Vulnly report summary: stat cards, severity distribution chart and executive summary">
+<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example.jpg" alt="Vulnly report summary: total, fixable, known exploited and likely exploited cards, severity cards, and the start of the overview">
 
-Further down, the findings themselves — where they are concentrated, then a
-sortable table with search, severity and fixable filters, and CSV export:
+Further down, the findings themselves: where they're concentrated, then the
+table in priority order, known exploited first, with KEV tags and EPSS scores,
+search, severity, fixable and exploitation filters, and CSV export:
 
-<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example2.jpg" alt="Vulnly findings: top affected packages breakdown and the filterable vulnerability table">
+<img src="https://raw.githubusercontent.com/fullstackspectrum/vulnly/main/assets/readme/example2.jpg" alt="Vulnly findings: top affected packages, the filters, and the table opening with known exploited findings tagged KEV with their EPSS scores">
 
 ## Usage
 
 ```
 usage: vulnly [-h] [-v] [-o OUTPUT] [--logo LOGO]
               [--theme {dark,light}] [--source SOURCE]
-              [--package PACKAGE] [--package-version PACKAGE_VERSION]
-              [--repository REPOSITORY]
+              [--package PACKAGE]
+              [--package-version PACKAGE_VERSION]
+              [--repository REPOSITORY] [--no-enrich] [--kev FILE]
+              [--epss FILE] [--epss-threshold P]
+              [--sort {priority,severity}] [--vex FILE]
+              [--fail-on LIST]
               input
 
 Generate an HTML vulnerability report from a JSON input file.
 
 positional arguments:
-  input                 Path to the JSON file containing vulnerability
-                        data (use '-' for stdin)
+  input                 Path to the JSON file containing vulnerability data
+                        (use '-' for stdin)
 
 options:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
-  -o, --output OUTPUT   Output HTML file path (default: auto-generated
-                        from package metadata)
-  --logo LOGO           Path to a custom logo image (embedded in the
-                        report as a data URI)
+  -o, --output OUTPUT   Output HTML file path (default: auto-generated from
+                        package metadata)
+  --logo LOGO           Path to a custom logo image (embedded in the report as
+                        a data URI)
   --theme {dark,light}  Report colour theme (default: dark)
   --source SOURCE       Scanner source format: cloudsmith, cloudsmith-osv,
                         grype, snyk, trivy (auto-detected if omitted)
   --package PACKAGE     Package name to show in the report (overrides the
                         input)
   --package-version PACKAGE_VERSION
-                        Package version to show in the report (overrides
-                        the input)
+                        Package version to show in the report (overrides the
+                        input)
   --repository REPOSITORY
-                        Repository path to show in the report (overrides
-                        the input)
+                        Repository path to show in the report (overrides the
+                        input)
+
+prioritising:
+  Findings are checked against CISA's Known Exploited Vulnerabilities
+  catalogue and FIRST's EPSS scores, fetched when the report is generated
+  (cached for a day) and embedded in it, so the report still opens offline.
+
+  --no-enrich           don't look up KEV or EPSS (or set VULNLY_NO_ENRICH=1)
+  --kev FILE            use a downloaded KEV catalogue (CISA's JSON) instead
+                        of fetching it
+  --epss FILE           use a downloaded EPSS file (FIRST's daily CSV, plain
+                        or .gz) instead of the API
+  --epss-threshold P    EPSS score that counts as likely exploited (default:
+                        0.1, i.e. 10%)
+  --sort {priority,severity}
+                        table order: priority (known exploited, then likely
+                        exploited, then severity; the default) or severity
+  --vex FILE            apply an OpenVEX document: not_affected and fixed
+                        findings leave the counts and are listed separately
+                        (repeatable)
+  --fail-on LIST        exit 1 if any of these occur: kev, epss, critical,
+                        high, fixable (comma-separated; the report is still
+                        written)
 ```
 
 The three metadata flags override whatever the input format supplied. They
@@ -231,6 +335,8 @@ identity, but they apply to any source.
 | Variable | Effect |
 | --- | --- |
 | `VULNLY_NO_UPDATE_CHECK` | Set to any value to skip the PyPI version check. |
+| `VULNLY_NO_ENRICH` | Set to any value to skip the KEV and EPSS lookups, like `--no-enrich`. |
+| `VULNLY_CACHE_DIR` | Where KEV and EPSS lookups are cached (default `~/.cache/vulnly`, or `$XDG_CACHE_HOME/vulnly`). |
 
 The version check is skipped automatically when stderr is not a terminal, so
 it makes no network request in CI or when output is piped.
@@ -253,8 +359,10 @@ moved. It also means opening a report tells no third party that you did.
 CVE and GHSA identifiers still link out to NVD and GitHub Advisories, but those
 are ordinary links — nothing is fetched unless the reader clicks one.
 
-The generator itself contacts the network only for its PyPI version check,
-which can be disabled with `VULNLY_NO_UPDATE_CHECK` as described above.
+The generator itself contacts the network for the KEV and EPSS lookups
+described in [Prioritising findings](#prioritising-findings), and for its PyPI
+version check. Both can be turned off, with `VULNLY_NO_ENRICH` and
+`VULNLY_NO_UPDATE_CHECK`.
 
 ## Input JSON Format
 
@@ -490,7 +598,11 @@ The script prints a severity breakdown after generating the report:
 ```
 Report generated: reports/nginx_latest_nginx_latest_a72860cb95fd_grype_vulnerability_report.html (3 vulnerabilities)
   CRITICAL: 1  MEDIUM: 1  LOW: 1
+  1 known exploited (KEV), 1 likely exploited (EPSS ≥ 10%)
 ```
+
+The second line appears when KEV or EPSS data was looked up, and counts any
+findings ruled out by VEX.
 
 A clean scan says so explicitly:
 

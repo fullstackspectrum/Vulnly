@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-11-23
+
+### Added
+- **Know what to fix first.** Every finding with a CVE is checked against CISA's Known Exploited Vulnerabilities (KEV) catalogue and FIRST's EPSS scores. Known exploited findings get a `KEV` tag, with the date CISA added them and whether they're linked to ransomware, and every finding shows its EPSS probability and percentile in a new Exploitation column. Two new stat cards count known and likely exploited findings, two new toggles filter to them, and the executive summary and alert lead with known exploited findings when there are any. GHSA and Snyk findings are matched through the CVE aliases their scanner reports.
+- The lookups happen when the report is generated, are cached for a day, and are embedded in the report, which still opens with no network access. A failed lookup never stops a report. `--no-enrich` (or `VULNLY_NO_ENRICH`) turns them off, and `--kev` and `--epss` read downloaded copies for air-gapped hosts. `--epss-threshold` sets what counts as likely exploited (default 10%).
+- **VEX.** `--vex` applies OpenVEX documents. Findings marked `not_affected` or `fixed` leave the counts and are listed under the table with the statement's justification; `under_investigation` findings are tagged.
+- **CI gating.** `--fail-on kev,epss,critical,high,fixable` exits 1 when any listed category occurs. A `kev` or `epss` gate fails when that data couldn't be looked up, rather than passing.
+- CVSS vectors are scored, 3.x and 4.0, so OSV records that give only a vector now get a score and a severity instead of Unknown.
+- The CSV export has KEV, KEV dates, ransomware use, EPSS, EPSS percentile and VEX status columns.
+
+### Changed
+- **Reports open in priority order**: known exploited, then likely exploited, then severity, with EPSS and CVSS breaking ties. `--sort severity` keeps the previous order.
+- The CVSS column is headed CVSS rather than CVSS v3, since it now shows 4.0 scores too.
+- The stat cards are laid out in two rows, totals then severities, so none is ever left on a row alone at any width.
+
+### Fixed
+- The vulnerability table scrolls sideways on narrow screens instead of cutting off its right-hand columns.
+- Choosing a severity filter no longer removes the highlight from the "Fixable only" toggle while leaving it applied.
+
 ## [1.2.0] - 2026-11-08
 
 ### Changed
