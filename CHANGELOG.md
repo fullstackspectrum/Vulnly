@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- KEV and EPSS lookups give up after 5 seconds without a response, down from 20, so generating a report on a host with no network access waits seconds rather than tens of seconds before carrying on without them. A slow download that is still making progress is not cut off.
+- The README now states, near the top, that generating a report uses the network by default from 1.3.0, and how to turn that off.
+
 ## [1.3.0] - 2026-11-23
 
 ### Added
