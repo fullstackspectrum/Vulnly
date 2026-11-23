@@ -3,6 +3,14 @@
 Generate self-contained HTML vulnerability reports from Cloudsmith, Trivy, Grype and Snyk.
 Every report is a single file that opens with no network access.
 
+> **Network use when generating, from 1.3.0:** by default, Vulnly now
+> downloads CISA's Known Exploited Vulnerabilities catalogue and looks up
+> FIRST's EPSS scores while it generates a report. Reports themselves still
+> open with no network access. To generate with no network at all, set
+> `VULNLY_NO_ENRICH=1` (or pass `--no-enrich`) and `VULNLY_NO_UPDATE_CHECK=1`,
+> or pass downloaded copies with `--kev` and `--epss`. See
+> [Network and air-gapped hosts](#network-and-air-gapped-hosts).
+
 <p align="center">
   <a href="https://pypi.org/project/vulnly/"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpypi.org%2Fpypi%2Fvulnly%2Fjson&query=%24.info.version&prefix=v&label=PyPI&logo=pypi&logoColor=white&style=flat-square&labelColor=1f2937&color=0e7490" alt="PyPI"></a>
   <a href="https://pypi.org/project/vulnly/"><img src="https://img.shields.io/pypi/pyversions/vulnly?label=Python&logo=python&logoColor=white&style=flat-square&labelColor=1f2937&color=0e7490" alt="Python"></a>

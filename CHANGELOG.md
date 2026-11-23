@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - The CSV export has KEV, KEV dates, ransomware use, EPSS, EPSS percentile and VEX status columns.
 
 ### Changed
+- **Generating a report now uses the network by default.** Vulnly downloads CISA's KEV catalogue and queries FIRST's EPSS API while it generates a report; before 1.3.0 the only request was the PyPI update check. Reports still open with no network access. On air-gapped or restricted hosts, set `VULNLY_NO_ENRICH=1` (or pass `--no-enrich`), or pass downloaded copies with `--kev` and `--epss`. Without one of those, an unreachable network costs a short wait and a note in the report, and a `--fail-on kev` or `epss` gate fails.
 - **Reports open in priority order**: known exploited, then likely exploited, then severity, with EPSS and CVSS breaking ties. `--sort severity` keeps the previous order.
 - The CVSS column is headed CVSS rather than CVSS v3, since it now shows 4.0 scores too.
 - The stat cards are laid out in two rows, totals then severities, so none is ever left on a row alone at any width.
